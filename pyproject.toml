@@ -1,0 +1,89 @@
+[project]
+name = "modern-python-example"
+version = "0.1.0"
+description = "Example project with a modern Python setup: uv, mise, ruff and pyrefly."
+readme = "README.md"
+authors = [
+    { name = "Karl Yngve Lervåg", email = "karl.yngve+git@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "pydantic==2.14.0",
+]
+
+[project.scripts]
+modern-python-example = "modern_python_example:main"
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pyrefly==1.3.2",
+    "pytest==9.1.1",
+    "ruff==0.17.0",
+]
+
+[tool.uv]
+add-bounds = "exact"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+# use the default rules, but add a few additional ones
+extend-select = [
+  "E",  # pycodestyle rules: checks against pep 8 convention
+  "TID252",  # Checks for relative imports
+  "W",  # pycodestyle rules (warnings)
+]
+ignore = [
+  "E501",   # Line too long - fixed by formatter
+]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.pyrefly]
+project-includes = [
+  "src",
+  "tests",
+]
+
+# enable more checks
+[tool.pyrefly.errors]
+bad-dataclass-descriptor = true
+deprecated = true
+division-by-zero = true
+empty-body = true
+implicit-abstract-class = true
+implicit-any-attribute = true
+implicit-any-parameter = true
+implicit-import = true
+invalid-abstract-method = true
+invalid-cast = true
+missing-attribute-patch-target = true
+missing-override-decorator = true
+no-any-return-explicit = true
+non-exhaustive-match = true
+not-required-key-access = true
+redundant-cast = true
+redundant-condition = true
+regex = true
+string-as-iterable = true
+unannotated-return = true
+unimported-directive = true
+unknown-attribute-type = true
+unnecessary-comparison = true
+unnecessary-type-conversion = true
+unreachable = true
+unsafe-overlap = true
+unsupported-dynamic-base = true
+untyped-class-decorator = true
+untyped-function-decorator = true
+unused-ignore = true
+unused-type-ignore = true
+
+[tool.pytest]
+testpaths = ["tests"]

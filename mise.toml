@@ -1,0 +1,26 @@
+[tools]
+uv = "0.12.23"
+
+[settings]
+python.uv_venv_auto = "source"
+
+[tasks.check]
+description = "Run formatting, linting and type checking"
+usage = """
+flag "--no-fix" help="Specify to disable auto-fix for CI"
+"""
+run = """
+if [ "${usage_no_fix}" = "true" ]; then
+  uv run ruff format --check
+  uv run ruff check
+else
+  uv run ruff format
+  uv run ruff check --fix
+fi
+
+uv run pyrefly check
+"""
+
+[tasks.test]
+description = "Run the test suite"
+run = "uv run pytest"

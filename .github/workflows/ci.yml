@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Cancel in flight runs on a new push to a PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Run code linter and type checker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      # We could let `mise` install `uv`, but with the setup-uv action we get
+      # caching, which is very convenient
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.0.1
+        with:
+          version: "0.12.23"  # keep in sync with mise.toml
+          enable-cache: true
+
+      - name: Set up mise
+        uses: jdx/mise-action@v4.3.0
+        # `uv` is already installed above - we only want to run the mise task here
+        with:
+          install: false
+
+      - name: Install the project
+        run: uv sync --locked
+
+      - name: Run checks
+        run: mise run check --no-fix
+
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # `checks: write` lets the JUnit reporter annotate failing tests on the PR.
+      checks: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.0.1
+        with:
+          version: "0.12.23"  # keep in sync with mise.toml
+          enable-cache: true
+
+      - name: Install the project
+        run: uv sync --locked
+
+      - name: Run tests
+        run: uv run pytest --durations=50 --junitxml=junit.xml
+
+      - name: Publish test summary
+        uses: mikepenz/action-junit-report@v6.5.0
+        if: ${{ !cancelled() }}
+        with:
+          report_paths: junit.xml
+          annotate_only: true
+          detailed_summary: true
+          include_time_in_summary: true
